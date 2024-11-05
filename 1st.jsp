@@ -3,8 +3,8 @@
 <%
     // Database connection details
     String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";  // Using service name
-    String username = "SYSTEM";                       // Oracle DB username
-    String password = "skoracle";                     // Oracle DB password
+    String username = "system";                       // Oracle DB username
+    String password = "root";                     // Oracle DB password
     //String username = System.getenv("DB_USERNAME");
     //String password = System.getenv("DB_PASSWORD");
 

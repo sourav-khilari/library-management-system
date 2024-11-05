@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public class DB_ORA {
     // Database connection details
-    private static final String JDBC_URL = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
-    private static final String USERNAME = "SYSTEM";
-    private static final String PASSWORD = "skoracle";
+    private static final String JDBC_URL = "jdbc:oracle:thin:@//localhost:1521/xe";
+    private static final String USERNAME = "system";
+    private static final String PASSWORD = "root";
 
     // Static method to get a connection
     static {
