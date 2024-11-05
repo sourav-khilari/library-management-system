@@ -1,8 +1,8 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="javax.servlet.*" %>
 <%@ page import="javax.servlet.http.*" %>
-<%@ page import="java.util.List" %>         <!-- Import List -->
-<%@ page import="java.util.ArrayList" %>    <!-- Import ArrayList -->
+<%@ page import="java.util.List" %>         
+<%@ page import="java.util.ArrayList" %>    
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -86,6 +86,18 @@
         <input type="number" id="total_copies" name="total_copies" required><br>
 
         <input type="submit" value="Add Book">
+        <%
+            // Check for error message in the query string
+            String errorMessage = request.getParameter("error");
+            if (errorMessage != null) {
+        %>
+            <div style="color: red;">
+                <strong>Error:</strong> <%= errorMessage %>
+            </div>
+        <%
+            }
+        %>
+
     </form>
 </body>
 </html>
