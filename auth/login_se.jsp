@@ -10,7 +10,7 @@
     String pass = request.getParameter("password");                // User input: password
 
     Connection conn = null;
-    Statement stmt = null;
+    PreparedStatement pstmt = null;
     ResultSet rs = null;
 
     try {
@@ -20,28 +20,25 @@
         // Establish a connection
         conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
        
-        
-        // Debug: Print the inputs
-        //out.println("Debug - Entered Email: " + user + "<br>");
-        //out.println("Debug - Entered Password: " + pass + "<br>");
-
         // Construct the SQL query with user inputs (make sure to sanitize inputs)
-        String query = "select * from Users WHERE TRIM(LOWER(email)) = TRIM(LOWER('"+ user +"')) AND TRIM(password) = TRIM('"+ pass +"')";
-        
-        // Debug: Print the constructed query
-        //out.println("Executing query: " + query + "<br>");
-        
-        // Create a statement
-        stmt = conn.createStatement();
-        
+        String query = "SELECT * FROM Users WHERE TRIM(LOWER(email)) = TRIM(LOWER(?)) AND TRIM(password) = TRIM(?)";
+
+        // Create a prepared statement to prevent SQL injection
+        pstmt = conn.prepareStatement(query);
+        pstmt.setString(1, user);
+        pstmt.setString(2, pass);
+
         // Execute the query
-        rs = stmt.executeQuery(query);
+        rs = pstmt.executeQuery();
 
         // Check if user exists and display results
         if (rs.next()) {
-            response.sendRedirect("../pages/home.jsp?username=" + rs.getString("username"));
+            // User exists, store username in session
+            session.setAttribute("username", rs.getString("username")); // Store username in session
+            
+            // Redirect to home page
+            response.sendRedirect("../pages/home.jsp");
             return; // Exit the script after redirecting
-            //out.println("Username: " + rs.getString("username") + "<br>");
         } else {
             out.println("Invalid email or password.<br>");
         }
@@ -53,7 +50,7 @@
         // Close resources
         try {
             if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+            if (pstmt != null) pstmt.close();
             if (conn != null) conn.close();
         } catch (SQLException ex) {
             out.println("Error closing resources: " + ex.getMessage() + "<br>");

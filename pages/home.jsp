@@ -1,17 +1,16 @@
-<%@ page import="java.io.*" %>
-
 <%
-    String username = request.getParameter("username");
+    // Check if user is logged in by verifying session attribute
+    String username = (String) session.getAttribute("username");
+    if (username != null) {
 %>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Welcome</title>
-</head>
-<body>
-    <h1>Welcome, <%= username != null ? username : "Guest" %>!</h1>
-    <p>This is your personalized welcome page.</p>
-    <!-- Add more content here -->
-</body>
-</html>
+    <h1>Welcome, <%= username %>!</h1>
+    <p>This is your home page.</p>
+    <a href="logout.jsp">Logout</a>
+<%
+    } else {
+%>
+    <p>Please log in to access this page.</p>
+    <a href="login_p.jsp">Go to Login</a>
+<%
+    }
+%>
