@@ -1,5 +1,7 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.regex.*" %>
+<%@ page import="java.util.UUID" %>
+<%@ page import="java.math.BigInteger" %>
 
 <%
     // Check if the request method is POST
@@ -13,11 +15,17 @@
         String email = request.getParameter("email");
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        String phoneNo = request.getParameter("phone_no");
         String dob = request.getParameter("dob");
-        String distinction = request.getParameter("distinction");
-        String userId = request.getParameter("id");
-        String joinDate = request.getParameter("join_date");
+        String userRole = request.getParameter("user_role");
+        String department = request.getParameter("department"); // Capture the department
+
+        // Generate a unique user ID of fixed length 10
+        String uuid = UUID.randomUUID().toString().replace("-", ""); // Remove dashes
+        BigInteger bigInt = new BigInteger(uuid, 16); // Convert to BigInteger
+        String userId = bigInt.toString(36); // Convert to base-36 string
+        userId = userId.substring(0, Math.min(userId.length(), 10)); // Limit to 10 characters
+
+        String batch = request.getParameter("batch"); // Only for students
 
         // Validate inputs
         boolean isValid = true;
@@ -36,21 +44,9 @@
             isValid = false;
             errorMessage.append("Password cannot be empty.<br>");
         }
-        if (phoneNo == null || phoneNo.trim().isEmpty()) {
-            isValid = false;
-            errorMessage.append("Phone number cannot be empty.<br>");
-        }
         if (dob == null || dob.trim().isEmpty()) {
             isValid = false;
             errorMessage.append("Date of birth cannot be empty.<br>");
-        }
-        if (userId == null || userId.trim().isEmpty()) {
-            isValid = false;
-            errorMessage.append("User ID cannot be empty.<br>");
-        }
-        if (joinDate == null || joinDate.trim().isEmpty()) {
-            isValid = false;
-            errorMessage.append("Join date cannot be empty.<br>");
         }
 
         // Check for valid email format
@@ -60,73 +56,80 @@
             errorMessage.append("Invalid email format.<br>");
         }
 
-        // Check phone number length
-        if (phoneNo.length() != 10) {
-            isValid = false;
-            errorMessage.append("Phone number must be 10 digits long.<br>");
-        }
-
-        // Check password length
-        if (password.length() < 8) {
-            isValid = false;
-            errorMessage.append("Password must be at least 8 characters long.<br>");
-        }
-
         // If any validation fails, display errors
         if (!isValid) {
-            out.println("<p>Registration failed due to the following errors:</p>");
-            out.println("<p>" + errorMessage.toString() + "</p>");
-            out.println("<p><a href='../pages/register.jsp'>Go back to registration form</a></p>");
+            request.setAttribute("errorMessage", errorMessage.toString());
+            request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
             return; // Stop further processing
         }
 
         Connection conn = null;
         PreparedStatement pstmt = null;
+        PreparedStatement checkUserStmt = null;
 
         try {
             // Load Oracle JDBC Driver
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            
+
             // Establish a connection
             conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-            
+
+            // Check if the user already exists
+            String checkUserSql = "SELECT COUNT(*) FROM Users WHERE email = ?";
+            checkUserStmt = conn.prepareStatement(checkUserSql);
+            checkUserStmt.setString(1, email);
+            ResultSet rs = checkUserStmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                request.setAttribute("errorMessage", "User with this email already exists. Please use a different email.");
+                request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
+                return; // Stop further processing
+            }
+
             // Insert SQL statement
-            String sql = "INSERT INTO users_lib (email, username, password, phone_no, DOB, distinction, id, join_date) " +
-                         "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), ?, ?, TO_DATE(?, 'YYYY-MM-DD'))";
-            
+            String sql = "INSERT INTO Users (user_id, email, username, password, DOB, id, user_role, batch, department) " +
+                         "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?, ?)"; // Add department to the SQL
+
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, email);
-            pstmt.setString(2, username);
-            pstmt.setString(3, password);
-            pstmt.setString(4, phoneNo);
+            pstmt.setString(1, userId); // Set the unique user ID
+            pstmt.setString(2, email);
+            pstmt.setString(3, username);
+            pstmt.setString(4, password);
             pstmt.setString(5, dob);
-            pstmt.setString(6, distinction);
-            pstmt.setString(7, userId);
-            pstmt.setString(8, joinDate);
+            pstmt.setString(6, request.getParameter("id")); // This is the ID field for the student or faculty
+            pstmt.setString(7, userRole);
+            pstmt.setString(8, batch); // Optional, could be NULL
+            pstmt.setString(9, department); // Set the department value
 
             // Execute the insert
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
-                out.println("<p>Registration successful! You can now <a href='../pages/login_p.jsp'>login</a>.</p>");
+                request.setAttribute("successMessage", "Registration successful! You can now log in.");
+                request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
             } else {
-                out.println("<p>Registration failed. Please try again.</p>");
+                request.setAttribute("errorMessage", "Registration failed. Please try again.");
+                request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            out.println("<p>Error: " + e.getMessage() + "</p>");
+            request.setAttribute("errorMessage", "Error: " + e.getMessage());
+            request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            out.println("<p>An error occurred: " + e.getMessage() + "</p>");
+            request.setAttribute("errorMessage", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
         } finally {
             // Close resources
             try {
                 if (pstmt != null) pstmt.close();
+                if (checkUserStmt != null) checkUserStmt.close();
                 if (conn != null) conn.close();
             } catch (SQLException ex) {
                 out.println("<p>Error closing resources: " + ex.getMessage() + "</p>");
             }
         }
     } else {
-        out.println("<p>Invalid request method. Please use the registration form.</p>");
+        request.setAttribute("errorMessage", "Invalid request method. Please use the registration form.");
+        request.getRequestDispatcher("../pages/register.jsp").forward(request, response);
     }
 %>

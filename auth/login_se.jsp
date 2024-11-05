@@ -26,7 +26,7 @@
         //out.println("Debug - Entered Password: " + pass + "<br>");
 
         // Construct the SQL query with user inputs (make sure to sanitize inputs)
-        String query = "select * from USERS_LIB WHERE TRIM(LOWER(email)) = TRIM(LOWER('"+ user +"')) AND TRIM(password) = TRIM('"+ pass +"')";
+        String query = "select * from Users WHERE TRIM(LOWER(email)) = TRIM(LOWER('"+ user +"')) AND TRIM(password) = TRIM('"+ pass +"')";
         
         // Debug: Print the constructed query
         //out.println("Executing query: " + query + "<br>");
