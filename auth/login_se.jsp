@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*" %>
 
+
 <%
     // Database connection details
     String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";  // Using service name
@@ -19,8 +20,8 @@
 
         // Establish a connection
         conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-       
-        // Construct the SQL query with user inputs (make sure to sanitize inputs)
+        
+        // Construct the SQL query with user inputs
         String query = "SELECT * FROM Users WHERE TRIM(LOWER(email)) = TRIM(LOWER(?)) AND TRIM(password) = TRIM(?)";
 
         // Create a prepared statement to prevent SQL injection
@@ -33,11 +34,29 @@
 
         // Check if user exists and display results
         if (rs.next()) {
-            // User exists, store username in session
-            session.setAttribute("username", rs.getString("username")); // Store username in session
+            // User exists, retrieve role and store username in session
+            String username = rs.getString("username");
+            String role = rs.getString("user_role"); // Assuming there's a 'role' column
             
-            // Redirect to home page
-            response.sendRedirect("../pages/home.jsp");
+            session.setAttribute("username", username); // Store username in session
+            session.setAttribute("role", role);
+            // Redirect based on user role
+            if ("student".equalsIgnoreCase(role)) {
+                // Redirect to student page
+
+                response.sendRedirect("../pages/studentHome.jsp");
+            } else if ("librarian".equalsIgnoreCase(role)) {
+                // Redirect to librarian page
+                response.sendRedirect("../pages/librarian/librarian_home.jsp");
+            }
+            else if ("faculty".equalsIgnoreCase(role)) {
+                // Redirect to faculty page
+                response.sendRedirect("../pages/facultyHome.jsp");
+            }
+            else {
+                // Handle other roles if necessary
+                out.println("User role not recognized.<br>");
+            }
             return; // Exit the script after redirecting
         } else {
             out.println("Invalid email or password.<br>");
