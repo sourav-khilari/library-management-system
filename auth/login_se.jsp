@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*" %>
 
+
 <%
     // Database connection details
     String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";  // Using service name
@@ -10,7 +11,7 @@
     String pass = request.getParameter("password");                // User input: password
 
     Connection conn = null;
-    Statement stmt = null;
+    PreparedStatement pstmt = null;
     ResultSet rs = null;
 
     try {
@@ -19,29 +20,44 @@
 
         // Establish a connection
         conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-       
         
-        // Debug: Print the inputs
-        //out.println("Debug - Entered Email: " + user + "<br>");
-        //out.println("Debug - Entered Password: " + pass + "<br>");
+        // Construct the SQL query with user inputs
+        String query = "SELECT * FROM Users WHERE TRIM(LOWER(email)) = TRIM(LOWER(?)) AND TRIM(password) = TRIM(?)";
 
-        // Construct the SQL query with user inputs (make sure to sanitize inputs)
-        String query = "select * from Users WHERE TRIM(LOWER(email)) = TRIM(LOWER('"+ user +"')) AND TRIM(password) = TRIM('"+ pass +"')";
-        
-        // Debug: Print the constructed query
-        //out.println("Executing query: " + query + "<br>");
-        
-        // Create a statement
-        stmt = conn.createStatement();
-        
+        // Create a prepared statement to prevent SQL injection
+        pstmt = conn.prepareStatement(query);
+        pstmt.setString(1, user);
+        pstmt.setString(2, pass);
+
         // Execute the query
-        rs = stmt.executeQuery(query);
+        rs = pstmt.executeQuery();
 
         // Check if user exists and display results
         if (rs.next()) {
-            response.sendRedirect("../pages/home.jsp?username=" + rs.getString("username"));
+            // User exists, retrieve role and store username in session
+            String username = rs.getString("username");
+            String role = rs.getString("user_role"); // Assuming there's a 'role' column
+            
+            session.setAttribute("username", username); // Store username in session
+            session.setAttribute("role", role);
+            // Redirect based on user role
+            if ("student".equalsIgnoreCase(role)) {
+                // Redirect to student page
+
+                response.sendRedirect("../pages/studentHome.jsp");
+            } else if ("librarian".equalsIgnoreCase(role)) {
+                // Redirect to librarian page
+                response.sendRedirect("../pages/librarian/librarian_home.jsp");
+            }
+            else if ("faculty".equalsIgnoreCase(role)) {
+                // Redirect to faculty page
+                response.sendRedirect("../pages/facultyHome.jsp");
+            }
+            else {
+                // Handle other roles if necessary
+                out.println("User role not recognized.<br>");
+            }
             return; // Exit the script after redirecting
-            //out.println("Username: " + rs.getString("username") + "<br>");
         } else {
             out.println("Invalid email or password.<br>");
         }
@@ -53,7 +69,7 @@
         // Close resources
         try {
             if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+            if (pstmt != null) pstmt.close();
             if (conn != null) conn.close();
         } catch (SQLException ex) {
             out.println("Error closing resources: " + ex.getMessage() + "<br>");

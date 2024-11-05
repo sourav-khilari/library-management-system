@@ -1,71 +1,74 @@
 <%@ page import="java.sql.*" %>
-<%
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1"; // Using service name
-    String dbUsername = "system"; // Oracle DB username
-    String dbPassword = "root"; // Oracle DB password
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.io.*" %>
 
-    String name = request.getParameter("name");
+<%
+    // Database connection details
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";  // Using service name
+    String dbUsername = "SYSTEM";                                  // Oracle DB username
+    String dbPassword = "skoracle";                                // Oracle DB password
+
+    // Retrieve form parameters
+    String title = request.getParameter("title");
     String author = request.getParameter("author");
     String publisher = request.getParameter("publisher");
-    String title = request.getParameter("title");
+    String edition = request.getParameter("edition");
     String categoryId = request.getParameter("category_id");
+    String totalCopies = request.getParameter("total_copies");
 
-    boolean hasError = false;
-
-    // Validate each field and set error messages if any are empty
-    if (name == null || name.trim().isEmpty()) {
-        request.setAttribute("nameError", "Name is required.");
-        hasError = true;
-    }
-    if (author == null || author.trim().isEmpty()) {
-        request.setAttribute("authorError", "Author is required.");
-        hasError = true;
-    }
-    if (publisher == null || publisher.trim().isEmpty()) {
-        request.setAttribute("publisherError", "Publisher is required.");
-        hasError = true;
-    }
-    if (title == null || title.trim().isEmpty()) {
-        request.setAttribute("titleError", "Title is required.");
-        hasError = true;
-    }
-    if (categoryId == null || categoryId.trim().isEmpty()) {
-        request.setAttribute("categoryError", "Category ID is required.");
-        hasError = true;
-    }
-
-    if (hasError) {
-        // If there is an error, forward back to the form with error messages
-        request.getRequestDispatcher("bookadd.jsp").forward(request, response);
+    // Validate the inputs
+    if (title == null || title.isEmpty() || categoryId == null || categoryId.isEmpty() || totalCopies == null || totalCopies.isEmpty()) {
+        out.println("Title, category, and total copies are required fields.<br>");
+        out.println("<a href='../../pages/librarian/add_book.jsp'>Go back</a>");
     } else {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-
-        try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-            conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-
-            // Insert book into the database
-            String sql = "INSERT INTO books (name, author, publisher, title, category_id) VALUES (?, ?, ?, ?, ?)";
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, name);
-            pstmt.setString(2, author);
-            pstmt.setString(3, publisher);
-            pstmt.setString(4, title);
-            pstmt.setInt(5, Integer.parseInt(categoryId));
-
-            pstmt.executeUpdate();
-            out.println("<p>Book added successfully.</p>");
-
-        } catch (SQLException e) {
-            out.println("<p>Error: " + e.getMessage() + "</p>");
-        } finally {
-            try {
-                if (pstmt != null) pstmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException ex) {
-                out.println("<p>Error closing resources: " + ex.getMessage() + "</p>");
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword)) {
+            
+            // Check if the book already exists
+            String checkQuery = "SELECT COUNT(*) FROM Books WHERE title = ? AND author = ? AND publisher = ? AND edition = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+                checkStmt.setString(1, title);
+                checkStmt.setString(2, author);
+                checkStmt.setString(3, publisher);
+                checkStmt.setString(4, edition);
+                
+                ResultSet rs = checkStmt.executeQuery();
+                rs.next();
+                int count = rs.getInt(1);
+                
+                if (count > 0) {
+                    // Book already exists
+                    response.sendRedirect("../../pages/librarian/add_book.jsp?error=Book already exists.");
+                    return; // Stop processing further
+                }
             }
+            
+            // Prepare the insert statement if the book does not exist
+            String insertQuery = "INSERT INTO Books (book_id, title, author, publisher, edition, category_id, total_copies, available_copies) " +
+                                 "VALUES (Books_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
+                // Set parameters
+                pstmt.setString(1, title);
+                pstmt.setString(2, author);
+                pstmt.setString(3, publisher);
+                pstmt.setString(4, edition);
+                pstmt.setInt(5, Integer.parseInt(categoryId)); // category_id as an integer
+                pstmt.setInt(6, Integer.parseInt(totalCopies));
+                pstmt.setInt(7, Integer.parseInt(totalCopies)); // available_copies equals total_copies
+
+                // Execute the update
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    out.println("Book added successfully!<br>");
+                } else {
+                    out.println("Failed to add book.<br>");
+                }
+            }
+        } catch (SQLException e) {
+            out.println("Error saving book: " + e.getMessage() + "<br>");
+        } catch (NumberFormatException e) {
+            out.println("Invalid number format for category or total copies.<br>");
+        } catch (Exception e) {
+            out.println("An unexpected error occurred: " + e.getMessage() + "<br>");
         }
     }
 %>
