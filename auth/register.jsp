@@ -8,8 +8,8 @@
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         // Database connection details
         String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1"; // Using service name
-        String dbUsername = "system"; // Oracle DB username
-        String dbPassword = "root"; // Oracle DB password
+        String dbUsername = "SYSTEM";                                  // Oracle DB username
+        String dbPassword = "skoracle"; 
 
         // Get form parameters
         String email = request.getParameter("email");

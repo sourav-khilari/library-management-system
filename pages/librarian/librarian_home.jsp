@@ -33,8 +33,7 @@
 
 <h2>Select an Operation</h2>
 <a href="add_book.jsp" class="operation-link">Add Book</a>
-<a href="delete_book.jsp" class="operation-link">Delete Book</a>
-<a href="manage_books.jsp?operation=updateBook" class="operation-link">Update Book</a>
+<a href="../serach.jsp" class="operation-link">Search/Update/Delete Book</a>
 <a href="manage_books.jsp?operation=deleteMember" class="operation-link">Delete Member</a>
 
 </body>
