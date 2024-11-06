@@ -2,9 +2,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
-    String dbUsername = "system";
-    String dbPassword = "root";
+String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+String dbUsername = "SYSTEM";
+String dbPassword = "skoracle";
 
     String bookId = request.getParameter("book_id");
     String title = request.getParameter("title");

@@ -3,9 +3,9 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";  // Using service name
-    String dbUsername = "system";                                  // Oracle DB username
-    String dbPassword = "root";                                // Oracle DB password
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+    String dbUsername = "SYSTEM";
+    String dbPassword = "skoracle";                             // Oracle DB password
 
     String user = request.getParameter("email");                   // User input: email
     String pass = request.getParameter("password");                // User input: password
@@ -46,14 +46,14 @@
             if ("student".equalsIgnoreCase(role)) {
                 // Redirect to student page
 
-                response.sendRedirect("../pages/search.jsp");
+                response.sendRedirect("../pages/student_faculty/stu_fac_home.jsp");
             } else if ("librarian".equalsIgnoreCase(role)) {
                 // Redirect to librarian page
                 response.sendRedirect("../pages/librarian/librarian_home.jsp");
             }
             else if ("faculty".equalsIgnoreCase(role)) {
                 // Redirect to faculty page
-                response.sendRedirect("../pages/facultyHome.jsp");
+                response.sendRedirect("../pages/student_faculty/stu_fac_home.jsp");
             }
             else {
                 // Handle other roles if necessary

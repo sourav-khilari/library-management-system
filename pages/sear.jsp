@@ -22,6 +22,7 @@
     // Retrieve user role and username from the session
     String role = (String) session.getAttribute("role"); // "librarian", "student", "faculty"
     String username = (String) session.getAttribute("username");
+    String userId = (String) session.getAttribute("userId");
 
     // Retrieve categories for the dropdown
     List<String> categories = new ArrayList<>();
@@ -42,23 +43,129 @@
     }
 %>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Book Search</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background: linear-gradient(to right, #e3f2fd, #ffffff); /* Light blue to white gradient */
+<!-- Search Form -->
+<h2>Advanced Book Search</h2>
+<form action="search.jsp" method="get">
+    Title: <input type="text" name="title" value="<%= title != null ? title : "" %>"><br>
+    Author: <input type="text" name="author" value="<%= author != null ? author : "" %>"><br>
+    Publisher: <input type="text" name="publisher" value="<%= publisher != null ? publisher : "" %>"><br>
+    Edition: <input type="text" name="edition" value="<%= edition != null ? edition : "" %>"><br>
+    Category:
+    <select name="category">
+        <option value="">--Select Category--</option>
+        <%
+            for (String cat : categories) {
+                if (cat.equals(category)) {
+                    out.println("<option value='" + cat + "' selected>" + cat + "</option>");
+                } else {
+                    out.println("<option value='" + cat + "'>" + cat + "</option>");
+                }
+            }
+        %>
+    </select><br>
+    <input type="submit" value="Search">
+</form>
+
+<% 
+    // Display search results only if form is submitted
+    if (title != null || author != null || publisher != null || edition != null || category != null) {
+
+        // Build SQL query based on input parameters
+        StringBuilder query = new StringBuilder("SELECT * FROM Books WHERE 1=1");
+        if (title != null && !title.isEmpty()) query.append(" AND title LIKE ?");
+        if (author != null && !author.isEmpty()) query.append(" AND author LIKE ?");
+        if (publisher != null && !publisher.isEmpty()) query.append(" AND publisher LIKE ?");
+        if (edition != null && !edition.isEmpty()) query.append(" AND edition = ?");
+        if (category != null && !category.isEmpty()) query.append(" AND category_id = (SELECT category_id FROM Category WHERE category_name = ?)");
+
+        try {
+            pstmt = conn.prepareStatement(query.toString());
+
+            int index = 1;
+            if (title != null && !title.isEmpty()) pstmt.setString(index++, "%" + title + "%");
+            if (author != null && !author.isEmpty()) pstmt.setString(index++, "%" + author + "%");
+            if (publisher != null && !publisher.isEmpty()) pstmt.setString(index++, "%" + publisher + "%");
+            if (edition != null && !edition.isEmpty()) pstmt.setString(index++, edition);
+            if (category != null && !category.isEmpty()) pstmt.setString(index++, category);
+
+            rs = pstmt.executeQuery();
+%>
+
+<!-- Display Search Results Table -->
+<h2>Search Results</h2>
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Publisher</th>
+        <th>Edition</th>
+        <th>Available Copies</th>
+        <th>Total Copies</th>
+        <th>Actions</th>
+    </tr>
+<%
+            while (rs.next()) {
+                int bookId = rs.getInt("book_id");
+                String status = ""; // To store the status of the book
+
+                // Check if the book is issued to the user
+                pstmt = conn.prepareStatement("SELECT status FROM Issued_Books WHERE user_id = ? AND book_id = ?");
+                pstmt.setString(1, userId);
+                pstmt.setInt(2, bookId);
+                ResultSet statusRs = pstmt.executeQuery();
+                if (statusRs.next()) {
+                    status = statusRs.getString("status");
+                }
+                statusRs.close(); // Close the status check ResultSet
+                pstmt.close(); // Close the PreparedStatement
+
+                // Display book details
+%>
+    <tr>
+        <td><%= rs.getString("title") %></td>
+        <td><%= rs.getString("author") %></td>
+        <td><%= rs.getString("publisher") %></td>
+        <td><%= rs.getString("edition") %></td>
+        <td><%= rs.getInt("available_copies") %></td>
+        <td><%= rs.getInt("total_copies") %></td>
+        <td>
+            <% if ("librarian".equalsIgnoreCase(role)) { %>
+                <form action="librarian/update_book.jsp" method="post" style="display:inline;">
+                    <input type="hidden" name="book_id" value="<%= bookId %>">
+                    <input type="submit" value="Update">
+                </form>
+                <form action="librarian/delete_book.jsp" method="post" style="display:inline;">
+                    <input type="hidden" name="book_id" value="<%= bookId %>">
+                    <input type="submit" value="Delete">
+                </form>
+            <% } else { %>
+                <% if ("pending".equalsIgnoreCase(status)) { %>
+                    <span>Pending</span>
+                <% } else if ("issued".equalsIgnoreCase(status)) { %>
+                    <span>Issued</span>
+                <% } else if (rs.getInt("available_copies") > 0) { %>
+                    <form action="student_faculty/issue_book.jsp" method="post" style="display:inline;">
+                        <input type="hidden" name="book_id" value="<%= bookId %>">
+                        <input type="submit" value="Issue Book">
+                    </form>
+                <% } else { %>
+                    <span>Not Available</span>
+                <% } %>
+            <% } %>
+        </td>
+    </tr>
+<%
+            }
+%>
+</table>
+
+<%
+        } catch (SQLException e) {
+            out.println("Error retrieving books: " + e.getMessage());
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException ignored) {}
+            if (pstmt != null) try { pstmt.close(); } catch (SQLException ignored) {}
+            if (conn != null) try { conn.close(); } catch (SQLException ignored) {}
         }
 
         .container {
@@ -256,7 +363,7 @@
                         <input type="submit" value="Delete" class="delete-button">
                     </form>
                 <% } else { %>
-                    <form action="student_faculty/issue_book.jsp" method="post">
+                    <form action="issue_book.jsp" method="post">
                         <input type="hidden" name="book_id" value="<%= rs.getInt("book_id") %>">
                         <input type="submit" value="Issue Book" class="issue-button">
                     </form>

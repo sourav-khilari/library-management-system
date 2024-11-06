@@ -22,6 +22,7 @@
     // Retrieve user role and username from the session
     String role = (String) session.getAttribute("role"); // "librarian", "student", "faculty"
     String username = (String) session.getAttribute("username");
+    String userId = (String) session.getAttribute("userId");
 
     // Retrieve categories for the dropdown
     List<String> categories = new ArrayList<>();
@@ -256,7 +257,7 @@
                         <input type="submit" value="Delete" class="delete-button">
                     </form>
                 <% } else { %>
-                    <form action="student_faculty/issue_book.jsp" method="post">
+                    <form action="issue_book.jsp" method="post">
                         <input type="hidden" name="book_id" value="<%= rs.getInt("book_id") %>">
                         <input type="submit" value="Issue Book" class="issue-button">
                     </form>
