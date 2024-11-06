@@ -15,7 +15,6 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: url('https://images.unsplash.com/photo-1579034046267-d0c2a3a55c56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDB8fGJvb2slMjBsaWJyYXJ5fGVufDB8fHx8MTY4MTg1Mzc2Mg&ixlib=rb-4.0.3&q=80&w=1920') no-repeat center center fixed;
             background-size: cover;
             backdrop-filter: blur(8px);
         }
@@ -68,7 +67,9 @@
         .search-update {
             background-color: #3e7e40;; /* Amber for Search/Update/Delete */
         }
-
+        .accept-request {
+        background-color: #ff9800; /* Amber/Orange for Issue Request */
+    }
         .delete-member {
             background-color: #3e7e40; /* Red for Delete Member */
         }
@@ -99,28 +100,31 @@
 </head>
 <body>
 
-<<<<<<< HEAD
-<h2>Select an Operation</h2>
-<a href="add_book.jsp" class="operation-link">Add Book</a>
-<a href="../serach.jsp" class="operation-link">Search/Update/Delete Book</a>
-<a href="delete_member.jsp" class="operation-link">Delete Member</a>
-<a href="accept_request.jsp" class="operation-link">issue request</a>
-=======
-<div class="container">
-    <h2>Welcome, Librarian!</h2>
-    <p>Manage your library operations efficiently. Choose an action below to get started:</p>
-    <a href="add_book.jsp" class="operation-link add-book">
-        <i class="fas fa-book-plus"></i> Add New Book
-    </a>
-    <a href="../search.jsp" class="operation-link search-update">
-        <i class="fas fa-search"></i> Search/Update/Delete Book
-    </a>
-    <a href="manage_books.jsp?operation=deleteMember" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i> Delete Member
-    </a>
+    <div class="container">
+        <h2>Welcome, Librarian!</h2>
+        <p>Manage your library operations efficiently. Choose an action below to get started:</p>
     
-</div>
+        <!-- Link for adding a new book, with consistent styling and icons -->
+        <a href="add_book.jsp" class="operation-link add-book">
+            <i class="fas fa-book-plus"></i> Add New Book
+        </a>
+    
+        <!-- Link for searching, updating, or deleting a book, with consistent styling and icons -->
+        <a href="../search.jsp" class="operation-link search-update">
+            <i class="fas fa-search"></i> Search/Update/Delete Book
+        </a>
+    
+        <!-- Link for deleting a member, with consistent styling and icons -->
+        <a href="delete_member.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-slash"></i> Delete Member
+        </a>
+    
+        <!-- New link for accepting issue requests, with consistent styling and icons -->
+        <a href="accept_request.jsp" class="operation-link accept-request">
+            <i class="fas fa-handshake"></i> Issue Request
+        </a>
+    </div>
+    
 
->>>>>>> de90f518148f911c1198e369fdce410bd5b0e24b
 </body>
 </html>

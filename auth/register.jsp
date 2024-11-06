@@ -7,9 +7,9 @@
     // Check if the request method is POST
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         // Database connection details
-        String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
-        String dbUsername = "SYSTEM";
-        String dbPassword = "skoracle";
+        String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
+        String dbUsername = "system";
+        String dbPassword = "root";
 
         // Get form parameters
         String email = request.getParameter("email");

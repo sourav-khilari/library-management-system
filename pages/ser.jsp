@@ -4,9 +4,9 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
-    String dbUsername = "SYSTEM";
-    String dbPassword = "skoracle";
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
+    String dbUsername = "system";
+    String dbPassword = "root";
 
     Connection conn = null;
     PreparedStatement pstmt = null;
