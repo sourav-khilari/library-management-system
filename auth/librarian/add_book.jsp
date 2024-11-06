@@ -4,9 +4,9 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";  // Using service name
-    String dbUsername = "SYSTEM";                                  // Oracle DB username
-    String dbPassword = "skoracle";                                // Oracle DB password
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";  // Using service name
+    String dbUsername = "system";                                  // Oracle DB username
+    String dbPassword = "root";                                   // Oracle DB password
 
     // Retrieve form parameters
     String title = request.getParameter("title");
@@ -58,7 +58,14 @@
                 // Execute the update
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    out.println("Book added successfully!<br>");
+                    // Show alert message and redirect
+                    out.println("<html><head>");
+                    out.println("<script type='text/javascript'>");
+                    out.println("alert('Book added successfully!');"); // JavaScript alert
+                    out.println("window.location.href='../../pages/librarian/librarian_home.jsp';"); // Redirect
+                    out.println("</script>");
+                    out.println("</head><body></body></html>");
+                    return; // Stop further processing
                 } else {
                     out.println("Failed to add book.<br>");
                 }
