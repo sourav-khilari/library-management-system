@@ -1,9 +1,11 @@
 <%@ page import="java.sql.*, java.util.Calendar" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
-    String dbUsername = "SYSTEM";
-    String dbPassword = "skoracle";
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
+    String dbUsername = "system";
+    String dbPassword = "root";
 
     // Database connection objects
     Connection conn = null;
@@ -24,33 +26,61 @@
         pstmt = conn.prepareStatement(query);
         rs = pstmt.executeQuery();
 
-        // Display pending requests to the librarian
-        out.println("<h2>Pending Book Requests</h2>");
-        out.println("<table border='1'>");
-        out.println("<tr><th>User ID</th><th>Email</th><th>Book Name</th><th>Actions</th></tr>");
+%>
 
-        while (rs.next()) {
-            String userId = rs.getString("USER_ID");
-            String email = rs.getString("EMAIL");
-            String bookName = rs.getString("title");
-            int bookId = rs.getInt("BOOK_ID");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Book Requests</title>
+    <link rel="stylesheet" href="../../css/accept_request.css"> <!-- Link to external CSS file -->
+</head>
+<body>
 
-            out.println("<tr>");
-            out.println("<td>" + userId + "</td>");
-            out.println("<td>" + email + "</td>");
-            out.println("<td>" + bookName + "</td>");
-            out.println("<td>");
-            out.println("<form action='../../auth/librarian/accept_issue_request.jsp' method='post'>");
-            out.println("<input type='hidden' name='userId' value='" + userId + "'>");
-            out.println("<input type='hidden' name='bookId' value='" + bookId + "'>");
-            out.println("<button type='submit' name='action' value='accept'>Accept</button>");
-            out.println("<button type='submit' name='action' value='decline'>Decline</button>");
-            out.println("</form>");
-            out.println("</td>");
-            out.println("</tr>");
-        }
-        out.println("</table>");
+    <div class="container">
+        <h2>Pending Book Requests</h2>
+        <table class="request-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Email</th>
+                    <th>Book Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    while (rs.next()) {
+                        String userId = rs.getString("USER_ID");
+                        String email = rs.getString("EMAIL");
+                        String bookName = rs.getString("title");
+                        int bookId = rs.getInt("BOOK_ID");
+                %>
+                <tr>
+                    <td><%= userId %></td>
+                    <td><%= email %></td>
+                    <td><%= bookName %></td>
+                    <td>
+                        <form action='../../auth/librarian/accept_issue_request.jsp' method='post'>
+                            <input type='hidden' name='userId' value='<%= userId %>'>
+                            <input type='hidden' name='bookId' value='<%= bookId %>'>
+                            <button type='submit' name='action' value='accept' class='btn accept-btn'>Accept</button>
+                            <button type='submit' name='action' value='decline' class='btn decline-btn'>Decline</button>
+                        </form>
+                    </td>
+                </tr>
+                <%
+                    }
+                %>
+            </tbody>
+        </table>
+    </div>
 
+</body>
+</html>
+
+<%
     } catch (SQLException e) {
         out.println("<p>Error: " + e.getMessage() + "</p>");
     } finally {

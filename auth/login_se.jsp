@@ -3,9 +3,9 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
-    String dbUsername = "SYSTEM";
-    String dbPassword = "skoracle";                             // Oracle DB password
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
+    String dbUsername = "system";
+    String dbPassword = "root";                             // Oracle DB password
 
     String user = request.getParameter("email");                   // User input: email
     String pass = request.getParameter("password");                // User input: password

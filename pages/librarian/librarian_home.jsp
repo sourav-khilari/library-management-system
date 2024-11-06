@@ -15,7 +15,6 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: url('https://images.unsplash.com/photo-1579034046267-d0c2a3a55c56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDB8fGJvb2slMjBsaWJyYXJ5fGVufDB8fHx8MTY4MTg1Mzc2Mg&ixlib=rb-4.0.3&q=80&w=1920') no-repeat center center fixed;
             background-size: cover;
             backdrop-filter: blur(8px);
         }
@@ -68,7 +67,9 @@
         .search-update {
             background-color: #3e7e40;; /* Amber for Search/Update/Delete */
         }
-
+        .accept-request {
+        background-color: #ff9800; /* Amber/Orange for Issue Request */
+    }
         .delete-member {
             background-color: #3e7e40; /* Red for Delete Member */
         }
