@@ -3,9 +3,9 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
-    String dbUsername = "system";
-    String dbPassword = "root";
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+    String dbUsername = "SYSTEM";
+    String dbPassword = "skoracle";  
 
     // Retrieve userId and bookId from the form
     String userId = request.getParameter("userId");
