@@ -10,21 +10,22 @@
     <h1>Pending Fine Payment Requests</h1>
 
     <%
-        // Database connection
+        // Database connection details
         String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
         String dbUsername = "SYSTEM";
         String dbPassword = "skoracle";
 
-        // Explicitly load the Oracle JDBC driver (optional for JDBC 4.0+)
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver"); // Loading the driver
+            // Load Oracle JDBC driver
+            Class.forName("oracle.jdbc.driver.OracleDriver");
 
-            // Query for fetching pending fine requests
-            String query = "SELECT ib.ISSUE_ID, ib.USER_ID, ib.BOOK_ID, ib.FINE, u.EMAIL, u.ROLE, u.ID " +
+            // Query to fetch pending fine requests
+            String query = "SELECT ib.ISSUE_ID, ib.USER_ID, ib.BOOK_ID, ib.FINE, u.EMAIL, u.USER_ROLE, u.ID " +
                            "FROM ISSUED_BOOKS ib " +
                            "JOIN USERS u ON ib.USER_ID = u.USER_ID " +
                            "WHERE ib.FINE_STATUS = 'Pending'";
 
+            // Establish connection to the database
             try (Connection conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
                  Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery(query)) {
@@ -61,17 +62,19 @@
                     <hr>
         <%
                 } // End of while loop
-            } catch (SQLException e) {
-                e.printStackTrace();
+
+                if (!rs.isBeforeFirst()) { // No results returned
         %>
-                <p>Error fetching fine requests. Please try again later.</p>
+                    <p>No pending fine payment requests found.</p>
         <%
+                }
+            } catch (SQLException e) {
+                out.println("<p>Error fetching fine requests: " + e.getMessage() + "</p>");
+                e.printStackTrace();
             }
         } catch (ClassNotFoundException e) {
+            out.println("<p>Error loading the Oracle JDBC driver: " + e.getMessage() + "</p>");
             e.printStackTrace();
-        %>
-            <p>Error loading the Oracle JDBC driver.</p>
-    <%
         }
     %>
 </body>
