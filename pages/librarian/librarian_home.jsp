@@ -122,6 +122,9 @@
     <a href="accept_request.jsp" class="operation-link delete-member">
         <i class="fas fa-user-slash"></i> issue request
     </a>
+    <a href="report_generation.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> report geneartion
+    </a>
 </div>
 
 </body>
