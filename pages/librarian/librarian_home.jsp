@@ -100,31 +100,29 @@
 </head>
 <body>
 
-    <div class="container">
-        <h2>Welcome, Librarian!</h2>
-        <p>Manage your library operations efficiently. Choose an action below to get started:</p>
-    
-        <!-- Link for adding a new book, with consistent styling and icons -->
-        <a href="add_book.jsp" class="operation-link add-book">
-            <i class="fas fa-book-plus"></i> Add New Book
-        </a>
-    
-        <!-- Link for searching, updating, or deleting a book, with consistent styling and icons -->
-        <a href="../search.jsp" class="operation-link search-update">
-            <i class="fas fa-search"></i> Search/Update/Delete Book
-        </a>
-    
-        <!-- Link for deleting a member, with consistent styling and icons -->
-        <a href="delete_member.jsp" class="operation-link delete-member">
-            <i class="fas fa-user-slash"></i> Delete Member
-        </a>
-    
-        <!-- New link for accepting issue requests, with consistent styling and icons -->
-        <a href="accept_request.jsp" class="operation-link accept-request">
-            <i class="fas fa-handshake"></i> Issue Request
-        </a>
-    </div>
-    
+
+<div class="container">
+    <h2>Welcome, Librarian!</h2>
+    <p>Manage your library operations efficiently. Choose an action below to get started:</p>
+    <a href="add_book.jsp" class="operation-link add-book">
+        <i class="fas fa-book-plus"></i> Add New Book
+    </a>
+    <a href="../search.jsp" class="operation-link search-update">
+        <i class="fas fa-search"></i> Search/Update/Delete Book
+    </a>
+    <a href="delete_member.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> Delete Member
+    </a>
+    <a href="fine_req.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i>fine request
+    </a>
+    <a href="return_book_req.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> return request
+    </a>
+    <a href="accept_request.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> issue request
+    </a>
+</div>
 
 </body>
 </html>

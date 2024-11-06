@@ -43,7 +43,7 @@
                                "b.TITLE, b.AUTHOR " +
                                "FROM ISSUED_BOOKS i " +
                                "JOIN BOOKS b ON i.BOOK_ID = b.BOOK_ID " +
-                               "WHERE i.USER_ID = ? AND i.STATUS = 'Issued'";
+                               "WHERE i.USER_ID = ? ";
                 pstmt = conn.prepareStatement(query);
                 pstmt.setString(1, userId);
                 rs = pstmt.executeQuery();
@@ -56,6 +56,7 @@
                     String author = rs.getString("AUTHOR");
                     String issueDate = rs.getString("ISSUE_DATE");
                     String dueDate = rs.getString("DUE_DATE");
+                    String status = rs.getString("STATUS");
                     double fine = rs.getDouble("FINE");
                     String fineAccepted = rs.getString("FINE_ACCEPTED");
                     boolean isFineAccepted = "Y".equalsIgnoreCase(fineAccepted);
@@ -69,11 +70,12 @@
                             <strong>Issue Date:</strong> <%= issueDate %> <br>
                             <strong>Due Date:</strong> <%= dueDate %> <br>
                             <strong>Fine Amount:</strong> $<%= fine %> <br>
+                            <strong>Status:</strong> <%= status %> <br>
                         </div>
                         <div class="actions">
                             <!-- Pay Fine button, only if there is a fine and it hasn't been accepted -->
                             <% if (fine > 0 && !isFineAccepted) { %>
-                                <form action="payFineServlet" method="post" style="display: inline;">
+                                <form action="pay_fine.jsp" method="post" style="display: inline;">
                                     <input type="hidden" name="issueId" value="<%= issueId %>">
                                     <button type="submit" class="btn btn-pay">Pay Fine</button>
                                 </form>
@@ -85,14 +87,14 @@
                                 <button class="btn btn-disabled" disabled>No Fine</button>
                             <% } %>
 
-                            <!-- Return button, only enabled if fine is zero or fine is paid -->
-                            <% if (fine == 0 || isFineAccepted) { %>
-                                <form action="returnBookServlet" method="post" style="display: inline;">
+                            <!-- Return button, only enabled if fine is zero or fine is paid and status is not 'Pending' or 'Declined' -->
+                            <% if ((fine == 0 || isFineAccepted) && !"Pending".equalsIgnoreCase(status) && !"Declined".equalsIgnoreCase(status)) { %>
+                                <form action="return_req.jsp" method="post" style="display: inline;">
                                     <input type="hidden" name="issueId" value="<%= issueId %>">
                                     <button type="submit" class="btn btn-return">Return</button>
                                 </form>
                             <% } else { %>
-                                <!-- Disabled return button if there is an unpaid fine -->
+                                <!-- Disabled return button if there is an unpaid fine or status is 'Pending' or 'Declined' -->
                                 <button class="btn btn-disabled" disabled>Return</button>
                             <% } %>
                         </div>
@@ -110,4 +112,4 @@
         %>
     </div>
 </body>
-</html>
+</html> 
