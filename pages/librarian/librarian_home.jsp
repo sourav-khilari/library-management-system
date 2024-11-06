@@ -1,3 +1,9 @@
+
+
+
+
+
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +23,7 @@
             height: 100vh;
             background-size: cover;
             backdrop-filter: blur(8px);
+            position: relative;
         }
 
         .container {
@@ -82,6 +89,47 @@
             transform: translateY(1px);
         }
 
+        /* Circular button in the top right corner */
+        .circle-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3e7e40;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        .circle-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Logout button */
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #f44336;
+            padding: 10px 20px;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .logout-button:hover {
+            background-color: #e53935;
+        }
+
         @media (max-width: 600px) {
             h2 {
                 font-size: 24px;
@@ -100,32 +148,44 @@
 </head>
 <body>
 
+    <!-- Logout button -->
+    <div class="logout-button">
+        <a href="../logout.jsp" style="color: white; text-decoration: none;">Logout</a>
+    </div>
 
-<div class="container">
-    <h2>Welcome, Librarian!</h2>
-    <p>Manage your library operations efficiently. Choose an action below to get started:</p>
-    <a href="add_book.jsp" class="operation-link add-book">
-        <i class="fas fa-book-plus"></i> Add New Book
-    </a>
-    <a href="../search.jsp" class="operation-link search-update">
-        <i class="fas fa-search"></i> Search/Update/Delete Book
-    </a>
-    <a href="delete_member.jsp" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i> Delete Member
-    </a>
-    <a href="fine_req.jsp" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i>fine request
-    </a>
-    <a href="return_book_req.jsp" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i> return request
-    </a>
-    <a href="accept_request.jsp" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i> issue request
-    </a>
-    <a href="report_generation.jsp" class="operation-link delete-member">
-        <i class="fas fa-user-slash"></i> report geneartion
-    </a>
-</div>
+    <div class="container">
+        <h2>Welcome, Librarian!</h2>
+        <p>Manage your library operations efficiently. Choose an action below to get started:</p>
+        
+        <a href="add_book.jsp" class="operation-link add-book">
+            <i class="fas fa-book-plus"></i> Add New Book
+        </a>
+        <a href="../search.jsp" class="operation-link search-update">
+            <i class="fas fa-search"></i> Search/Update Book Details
+        </a>
+        <a href="accept_request.jsp" class="operation-link accept-request">
+            <i class="fas fa-book-open"></i> Accept Book Issue Request
+        </a>
+        <a href="delete_member.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-minus"></i> Delete Member Account
+        </a>
+        <a href="fine_req.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-slash"></i>fine request
+        </a>
+        <a href="return_book_req.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-slash"></i> return request
+        </a>
+        <a href="accept_request.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-slash"></i> issue request
+        </a>
+        <a href="report_generation.jsp" class="operation-link delete-member">
+            <i class="fas fa-user-slash"></i> report geneartion
+        </a>
+    </div>
 
+    <!-- Circle Button for User Details -->
+    <div class="circle-button" onclick="window.location.href='../user_details.jsp';">
+        <i class="fas fa-user"></i>
+    </div>
 </body>
 </html>

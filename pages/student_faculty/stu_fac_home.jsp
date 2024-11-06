@@ -14,6 +14,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
+            position: relative; /* Added to position logout button */
         }
         .container {
             text-align: center;
@@ -32,9 +33,54 @@
         .button:hover {
             background-color: #45a049;
         }
+
+        /* Circular button in the top right corner */
+        .circle-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3e7e40;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        .circle-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Logout button */
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #f44336;
+            padding: 10px 20px;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .logout-button:hover {
+            background-color: #e53935;
+        }
     </style>
 </head>
 <body>
+    <div class="logout-button">
+        <a href="../logout.jsp" style="color: white; text-decoration: none;">Logout</a>
+    </div>
+    
     <div class="container">
         <h1>Welcome to the Library</h1>
         <p>Select an option below:</p>
@@ -45,5 +91,12 @@
         <!-- Button to navigate to Return and Pay Payment page -->
         <a href="return_payment.jsp" class="button">Return & clear fine</a>
     </div>
+
+    <!-- Circle Button for User Details -->
+    <div class="circle-button" onclick="window.location.href='../user_details.jsp';">
+        <i class="fas fa-user"></i>
+    </div>
 </body>
 </html>
+
+
