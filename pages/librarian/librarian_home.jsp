@@ -99,13 +99,7 @@
 </head>
 <body>
 
-<<<<<<< HEAD
-<h2>Select an Operation</h2>
-<a href="add_book.jsp" class="operation-link">Add Book</a>
-<a href="../serach.jsp" class="operation-link">Search/Update/Delete Book</a>
-<a href="delete_member.jsp" class="operation-link">Delete Member</a>
-<a href="accept_request.jsp" class="operation-link">issue request</a>
-=======
+
 <div class="container">
     <h2>Welcome, Librarian!</h2>
     <p>Manage your library operations efficiently. Choose an action below to get started:</p>
@@ -115,12 +109,19 @@
     <a href="../search.jsp" class="operation-link search-update">
         <i class="fas fa-search"></i> Search/Update/Delete Book
     </a>
-    <a href="manage_books.jsp?operation=deleteMember" class="operation-link delete-member">
+    <a href="delete_member.jsp" class="operation-link delete-member">
         <i class="fas fa-user-slash"></i> Delete Member
     </a>
-    
+    <a href="fine_req.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i>fine request
+    </a>
+    <a href="return_book_req.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> return request
+    </a>
+    <a href="accept_request.jsp" class="operation-link delete-member">
+        <i class="fas fa-user-slash"></i> issue request
+    </a>
 </div>
 
->>>>>>> de90f518148f911c1198e369fdce410bd5b0e24b
 </body>
 </html>
