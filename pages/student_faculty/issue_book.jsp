@@ -1,9 +1,9 @@
 <%@ page import="java.sql.*, java.util.Calendar" %>
 <%
     // Database connection details (replace with your actual values)
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
-    String dbUsername = "system";
-    String dbPassword = "root";                                // Oracle DB password
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+    String dbUsername = "SYSTEM";
+    String dbPassword = "skoracle";                            // Oracle DB password
 
     // Retrieve the user ID and book ID
     String userId = (String) session.getAttribute("userId");

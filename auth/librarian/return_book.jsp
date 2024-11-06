@@ -41,6 +41,7 @@
                                    "JOIN BOOKS b ON i.BOOK_ID = b.BOOK_ID " +
                                    "JOIN USERS u ON i.USER_ID = u.USER_ID " +
                                    "WHERE i.ISSUE_ID = ? AND i.USER_ID = ?";
+
                     pstmt = conn.prepareStatement(query);
                     pstmt.setString(1, issueId);
                     pstmt.setString(2, userId);
@@ -55,46 +56,62 @@
 
                         // Proceed if the book is not yet returned
                         if (!"Returned".equalsIgnoreCase(status)) {
-                            // Update the book status to "Returned" and set return date
-                            String returnDate = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+                            try {
+                                // Update the book status to "Returned" and set return date
+                                String returnDate = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+                                String updateIssuedBooksQuery = "UPDATE ISSUED_BOOKS SET RETURN_DATE = SYSDATE, STATUS = 'Returned' WHERE ISSUE_ID = ?";
+                                pstmt = conn.prepareStatement(updateIssuedBooksQuery);
+                                pstmt.setString(1, issueId);
+                                int issuedUpdateCount = pstmt.executeUpdate();
 
-                            // Use TO_DATE function to convert the date string to Oracle's DATE format
-                            String updateIssuedBooksQuery = "UPDATE ISSUED_BOOKS SET RETURN_DATE = SYSDATE, STATUS = 'Returned' WHERE ISSUE_ID = ?";
-                            pstmt = conn.prepareStatement(updateIssuedBooksQuery);
-                            pstmt.setString(1, issueId);  // Ensure the date is in 'YYYY-MM-DD' format
-                            //pstmt.setString(2, issueId);
-                            int issuedUpdateCount = pstmt.executeUpdate();
+                                if (issuedUpdateCount > 0) {
+                                    try {
+                                        // Update the BOOKS table: Increase available copy count
+                                        String updateBooksQuery = "UPDATE BOOKS SET AVAILABLE_COPIES = AVAILABLE_COPIES + 1 WHERE BOOK_ID = ?";
+                                        pstmt = conn.prepareStatement(updateBooksQuery);
+                                        pstmt.setInt(1, bookId);
+                                        pstmt.executeUpdate();
 
-                            if (issuedUpdateCount > 0) {
-                                // Update the BOOKS table: Increase available copy count
-                                String updateBooksQuery = "UPDATE BOOKS SET AVAILABLE_COPIES = AVAILABLE_COPIES + 1 WHERE BOOK_ID = ?";
-                                pstmt = conn.prepareStatement(updateBooksQuery);
-                                pstmt.setInt(1, bookId);
-                                pstmt.executeUpdate();
+                                        try {
+                                            // Update USERS table: Decrease issue book count
+                                            String updateUsersQuery = "UPDATE USERS SET ISSUED_BOOK_COUNT = ISSUED_BOOK_COUNT - 1 WHERE USER_ID = ?";
+                                            pstmt = conn.prepareStatement(updateUsersQuery);
+                                            pstmt.setString(1, userId);
+                                            pstmt.executeUpdate();
 
-                                // Update USERS table: Decrease issue book count
-                                String updateUsersQuery = "UPDATE USERS SET ISSUED_BOOK_COUNT = ISSUED_BOOK_COUNT - 1 WHERE USER_ID = ?";
-                                pstmt = conn.prepareStatement(updateUsersQuery);
-                                pstmt.setString(1, userId);
-                                pstmt.executeUpdate();
+                                            try {
+                                                // Insert transaction record into TRANSACTION_LOG
+                                                String transactionQuery = "INSERT INTO TRANSACTION_LOG (TRANSACTION_ID, USER_ID, BOOK_ID, TRANSACTION_TYPE, TRANSACTION_DATE) " +
+                                                                          "VALUES (SEQ_TRANSACTION_ID.NEXTVAL, ?, ?, 'Return', SYSDATE)";
+                                                pstmt = conn.prepareStatement(transactionQuery);
+                                                pstmt.setString(1, userId);
+                                                pstmt.setInt(2, bookId);
+                                                pstmt.executeUpdate();
 
-                                // Insert transaction record into TRANSACTION_LOG
-                                String transactionQuery = "INSERT INTO TRANSACTION_LOG (TRANSACTION_ID, USER_ID, BOOK_ID, TRANSACTION_TYPE, TRANSACTION_DATE) " +
-                                                          "VALUES (TRANSACTION_SEQ.NEXTVAL, ?, ?, 'Return', SYSDATE)";
-                                pstmt = conn.prepareStatement(transactionQuery);
-                                pstmt.setString(1, userId);
-                                pstmt.setInt(2, bookId);
-                                pstmt.executeUpdate();
-
-                                // Update the return request status to 'Approved'
-                                String updateRequestStatus = "UPDATE RETURN_REQUESTS SET STATUS = 'Approved' WHERE REQUEST_ID = ?";
-                                pstmt = conn.prepareStatement(updateRequestStatus);
-                                pstmt.setString(1, requestId);
-                                pstmt.executeUpdate();
-
-                                out.println("<div class='message success'>The book return has been approved and processed successfully.</div>");
-                            } else {
-                                out.println("<div class='message error'>Error processing the return. Please try again later.</div>");
+                                                try {
+                                                    // Update the return request status to 'Approved'
+                                                    String updateRequestStatus = "UPDATE RETURN_REQUESTS SET STATUS = 'Approved' WHERE REQUEST_ID = ?";
+                                                    pstmt = conn.prepareStatement(updateRequestStatus);
+                                                    pstmt.setString(1, requestId);
+                                                    pstmt.executeUpdate();
+                                                    out.println("<div class='message success'>The book return has been approved and processed successfully.</div>");
+                                                } catch (SQLException e) {
+                                                    out.println("<div class='message error'>Error updating request status: " + e.getMessage() + "</div>");
+                                                }
+                                            } catch (SQLException e) {
+                                                out.println("<div class='message error'>Error inserting transaction log: " + e.getMessage() + "</div>");
+                                            }
+                                        } catch (SQLException e) {
+                                            out.println("<div class='message error'>Error updating user book count: " + e.getMessage() + "</div>");
+                                        }
+                                    } catch (SQLException e) {
+                                        out.println("<div class='message error'>Error updating available copies: " + e.getMessage() + "</div>");
+                                    }
+                                } else {
+                                    out.println("<div class='message error'>Error processing the return. Please try again later.</div>");
+                                }
+                            } catch (SQLException e) {
+                                out.println("<div class='message error'>Error updating issued books: " + e.getMessage() + "</div>");
                             }
                         } else {
                             out.println("<div class='message error'>This book has already been returned.</div>");
@@ -104,11 +121,15 @@
                     }
                 } else if ("reject".equals(action)) {
                     // If the librarian rejects the return request
-                    String updateRequestStatus = "UPDATE RETURN_REQUESTS SET STATUS = 'Rejected' WHERE REQUEST_ID = ?";
-                    pstmt = conn.prepareStatement(updateRequestStatus);
-                    pstmt.setString(1, requestId);
-                    pstmt.executeUpdate();
-                    out.println("<div class='message error'>The book return request has been rejected.</div>");
+                    try {
+                        String updateRequestStatus = "UPDATE RETURN_REQUESTS SET STATUS = 'Rejected' WHERE REQUEST_ID = ?";
+                        pstmt = conn.prepareStatement(updateRequestStatus);
+                        pstmt.setString(1, requestId);
+                        pstmt.executeUpdate();
+                        out.println("<div class='message error'>The book return request has been rejected.</div>");
+                    } catch (SQLException e) {
+                        out.println("<div class='message error'>Error rejecting return request: " + e.getMessage() + "</div>");
+                    }
                 }
 
             } catch (SQLException | ClassNotFoundException e) {

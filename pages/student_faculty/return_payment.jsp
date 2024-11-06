@@ -27,9 +27,9 @@
             String userId = (String) session.getAttribute("userId");
             
             // Database connection setup
-            String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
-            String dbUsername = "system";
-            String dbPassword = "root";              
+            String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+            String dbUsername = "SYSTEM";
+            String dbPassword = "skoracle";              
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;

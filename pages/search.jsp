@@ -4,9 +4,10 @@
 
 <%
     // Database connection details
-    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/xe";
-    String dbUsername = "system";
-    String dbPassword = "root";
+    String jdbcUrl = "jdbc:oracle:thin:@//localhost:1521/XEPDB1";
+    String dbUsername = "SYSTEM";
+    String dbPassword = "skoracle";
+
 
     Connection conn = null;
     PreparedStatement pstmt = null;
@@ -26,6 +27,7 @@
     // Retrieve categories for the dropdown
     List<String> categories = new ArrayList<>();
     try {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
         conn = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
         pstmt = conn.prepareStatement("SELECT category_name FROM Category");
         rs = pstmt.executeQuery();
