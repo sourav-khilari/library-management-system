@@ -1,6 +1,6 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 
 <%
     // Database connection details
@@ -22,6 +22,7 @@
     // Retrieve user role and username from the session
     String role = (String) session.getAttribute("role"); // "librarian", "student", "faculty"
     String username = (String) session.getAttribute("username");
+    String userId = (String) session.getAttribute("userId");
 
     // Retrieve categories for the dropdown
     List<String> categories = new ArrayList<>();
@@ -104,6 +105,21 @@
     </tr>
 <%
             while (rs.next()) {
+                int bookId = rs.getInt("book_id");
+                String status = ""; // To store the status of the book
+
+                // Check if the book is issued to the user
+                pstmt = conn.prepareStatement("SELECT status FROM Issued_Books WHERE user_id = ? AND book_id = ?");
+                pstmt.setString(1, userId);
+                pstmt.setInt(2, bookId);
+                ResultSet statusRs = pstmt.executeQuery();
+                if (statusRs.next()) {
+                    status = statusRs.getString("status");
+                }
+                statusRs.close(); // Close the status check ResultSet
+                pstmt.close(); // Close the PreparedStatement
+
+                // Display book details
 %>
     <tr>
         <td><%= rs.getString("title") %></td>
@@ -115,18 +131,26 @@
         <td>
             <% if ("librarian".equalsIgnoreCase(role)) { %>
                 <form action="librarian/update_book.jsp" method="post" style="display:inline;">
-                    <input type="hidden" name="book_id" value="<%= rs.getInt("book_id") %>">
+                    <input type="hidden" name="book_id" value="<%= bookId %>">
                     <input type="submit" value="Update">
                 </form>
                 <form action="librarian/delete_book.jsp" method="post" style="display:inline;">
-                    <input type="hidden" name="book_id" value="<%= rs.getInt("book_id") %>">
+                    <input type="hidden" name="book_id" value="<%= bookId %>">
                     <input type="submit" value="Delete">
                 </form>
             <% } else { %>
-                <form action="issue_book.jsp" method="post" style="display:inline;">
-                    <input type="hidden" name="book_id" value="<%= rs.getInt("book_id") %>">
-                    <input type="submit" value="Issue Book">
-                </form>
+                <% if ("pending".equalsIgnoreCase(status)) { %>
+                    <span>Pending</span>
+                <% } else if ("issued".equalsIgnoreCase(status)) { %>
+                    <span>Issued</span>
+                <% } else if (rs.getInt("available_copies") > 0) { %>
+                    <form action="student_faculty/issue_book.jsp" method="post" style="display:inline;">
+                        <input type="hidden" name="book_id" value="<%= bookId %>">
+                        <input type="submit" value="Issue Book">
+                    </form>
+                <% } else { %>
+                    <span>Not Available</span>
+                <% } %>
             <% } %>
         </td>
     </tr>

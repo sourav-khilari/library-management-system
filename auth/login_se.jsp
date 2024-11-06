@@ -37,14 +37,16 @@
             // User exists, retrieve role and store username in session
             String username = rs.getString("username");
             String role = rs.getString("user_role"); // Assuming there's a 'role' column
-            
+            String userId = rs.getString("user_id");
+
             session.setAttribute("username", username); // Store username in session
             session.setAttribute("role", role);
+            session.setAttribute("userId", userId);
             // Redirect based on user role
             if ("student".equalsIgnoreCase(role)) {
                 // Redirect to student page
 
-                response.sendRedirect("../pages/studentHome.jsp");
+                response.sendRedirect("../pages/search.jsp");
             } else if ("librarian".equalsIgnoreCase(role)) {
                 // Redirect to librarian page
                 response.sendRedirect("../pages/librarian/librarian_home.jsp");
